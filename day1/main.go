@@ -37,7 +37,7 @@ func (h *MinHeap) Pop() interface{} {
 	return x
 }
 
-func parseInput(left, right *[]int) error {
+func parseInput(left, right *[]int, occurrence map[int]int) error {
 	file, err := os.Open("input")
 	if err != nil {
 		log.Println(err)
@@ -66,8 +66,9 @@ func parseInput(left, right *[]int) error {
 		if err != nil {
 			return err
 		}
-		*right = append(*right, first)
-		*left = append(*left, last)
+		*left = append(*left, first)
+		*right = append(*right, last)
+		occurrence[last]++
 	}
 	return nil
 }
@@ -75,7 +76,9 @@ func parseInput(left, right *[]int) error {
 func main() {
 	leftInput := new([]int)
 	rightInput := new([]int)
-	err := parseInput(leftInput, rightInput)
+	occurrence := make(map[int]int)
+
+	err := parseInput(leftInput, rightInput, occurrence)
 	if err != nil {
 		panic(err)
 	}
@@ -88,11 +91,17 @@ func main() {
 	*rightHeap = *rightInput
 	heap.Init(rightHeap)
 
-	ans := float64(0)
+	distance := float64(0)
+	score := float64(0)
 	for leftHeap.Len() > 0 {
 		left := heap.Pop(leftHeap).(int)
 		right := heap.Pop(rightHeap).(int)
-		ans += math.Abs(float64(right - left))
+		distance += math.Abs(float64(right - left))
+		if occurrence[left] > 0 {
+			score += float64(occurrence[left] * left)
+		}
 	}
-	fmt.Println(ans)
+	fmt.Printf("Distance: %d\n", int(distance))
+	fmt.Printf("Similarity Score: %d\n", int(score))
+
 }
